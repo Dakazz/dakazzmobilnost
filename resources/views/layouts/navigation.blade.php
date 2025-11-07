@@ -23,8 +23,8 @@
                 @endif
 
                 @if($user && (int)$user->type === 0)
-                    <x-nav-link :href="route('users.create')" :active="request()->routeIs('users.create')">
-                        {{ __('Create User') }}
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                        {{ __('User') }}
                     </x-nav-link>                        
                 @endif
             </div>
@@ -91,8 +91,8 @@
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('users.create')" :active="request()->routeIs('users.create')">
-                    {{ __('Create User') }}
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                    {{ __('User') }}
                 </x-responsive-nav-link>
             @elseif((int)$user->type === 1)
                 <x-responsive-nav-link :href="route('profesorDashboardShow')" :active="request()->routeIs('profesorDashboardShow')">

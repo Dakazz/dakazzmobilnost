@@ -27,7 +27,11 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('adminAuth')->prefix('admin')->group(function(){
     Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])->name('adminDashboardShow');
-    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+
+    Route::get('/users/', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users/', [UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 Route::middleware('profesorAuth')->prefix('profesor')->group(function(){

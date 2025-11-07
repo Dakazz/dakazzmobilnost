@@ -24,8 +24,7 @@ To run this application locally, follow these steps:
     ```bash
     php artisan key:generate
     ```
-6. Start the development server
+6. Run 
     ```bash
-    php artisan serve
+    npm run dev
     ```
-7. Access the application in your browser at http://localhost:8000
