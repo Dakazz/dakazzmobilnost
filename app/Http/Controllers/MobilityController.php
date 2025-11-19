@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LearningAgreement;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Element\Text;
@@ -21,6 +22,57 @@ class MobilityController extends Controller
         return view('mobility.index');
     }
 
+    public function save(Request $request)
+    {
+        $request->validate([
+            'ime' => 'required|string',
+            'prezime' => 'required|string',
+            'fakultet' => 'required|string',
+            'broj_indeksa' => 'required|string|unique:learning_agreements,broj_indeksa',
+            'links' => 'required|array|min:1',
+            'courses' => 'array',
+        ]);
+
+        $ime = $request->ime;
+        $prezime = $request->prezime;
+        $fakultet = $request->fakultet;
+        $brojIndeksa = $request->broj_indeksa;
+        $links = $request->input('links', []);
+        $courses = $request->input('courses', []);
+
+        $courseMap = [];
+        foreach ($courses as $c) {
+            $name = $c['Course'] ?? $c['Predmet'] ?? $c['name'] ?? null;
+            if ($name) {
+                $courseMap[trim($name)] = [
+                    'Term' => $c['Term'] ?? '',
+                    'ECTS' => $c['ECTS'] ?? '',
+                ];
+            }
+        }
+
+        $la = LearningAgreement::Create(
+            ['ime' => $ime, 'prezime' => $prezime, 'naziv_fakulteta' => $fakultet, 'broj_indeksa' => $brojIndeksa]
+        );
+
+        foreach ($links as $fitSubject => $foreignSubjects) {
+            $term = $courseMap[$fitSubject]['Term'] ?? null;
+            $ects = $courseMap[$fitSubject]['ECTS'] ?? null;
+
+            foreach ($foreignSubjects as $foreign) {
+                $la->courses()->create([
+                    'predmet_fit' => $fitSubject,
+                    'semestar' => $term,
+                    'ects' => $ects,
+                    'strani_predmet' => $foreign,
+                    'ocjena' => null,
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'Learning Agreement saved successfully.']);
+    }
+
     public function export(Request $request)
     {
         $request->validate([
@@ -29,6 +81,7 @@ class MobilityController extends Controller
             'ime'       => 'required|string',
             'prezime'   => 'required|string',
             'fakultet'  => 'required|string',
+            'brojIndeksa' => 'required|string'
         ]);
 
         $links = $request->input('links', []);
@@ -36,6 +89,7 @@ class MobilityController extends Controller
         $ime = trim($request->input('ime'));
         $prezime = trim($request->input('prezime'));
         $fakultet = trim($request->input('fakultet'));
+        $brojIndeksa = trim($request->input('brojIndeksa'));
 
         $courseMap = [];
         foreach ($courses as $c) {
@@ -56,7 +110,7 @@ class MobilityController extends Controller
 
         $textRun = $section->addTextRun(['size' => 12]);
         $textRun->addText('Student osnovnih studija ');
-        $textRun->addText("{$ime} {$prezime}", ['bold' => true]);
+        $textRun->addText("{$ime} {$prezime} {$brojIndeksa}", ['bold' => true]);
         $textRun->addText(' će boraviti na ');
         $textRun->addText($fakultet, ['bold' => true]);
         $textRun->addText('.');
