@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LearningAgreement extends Model
 {
-    protected $fillable = ['ime', 'prezime', 'naziv_fakulteta'];
+    protected $fillable = ['ime', 'prezime', 'naziv_fakulteta', 'broj_indeksa'];
 
     public function courses(): HasMany
     {

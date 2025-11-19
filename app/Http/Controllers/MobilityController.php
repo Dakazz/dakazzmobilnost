@@ -28,6 +28,7 @@ class MobilityController extends Controller
             'ime' => 'required|string',
             'prezime' => 'required|string',
             'fakultet' => 'required|string',
+            'broj_indeksa' => 'required|string|unique:learning_agreements,broj_indeksa',
             'links' => 'required|array|min:1',
             'courses' => 'array',
         ]);
@@ -35,6 +36,7 @@ class MobilityController extends Controller
         $ime = $request->ime;
         $prezime = $request->prezime;
         $fakultet = $request->fakultet;
+        $brojIndeksa = $request->broj_indeksa;
         $links = $request->input('links', []);
         $courses = $request->input('courses', []);
 
@@ -50,7 +52,7 @@ class MobilityController extends Controller
         }
 
         $la = LearningAgreement::Create(
-            ['ime' => $ime, 'prezime' => $prezime, 'naziv_fakulteta' => $fakultet]
+            ['ime' => $ime, 'prezime' => $prezime, 'naziv_fakulteta' => $fakultet, 'broj_indeksa' => $brojIndeksa]
         );
 
         foreach ($links as $fitSubject => $foreignSubjects) {
@@ -79,6 +81,7 @@ class MobilityController extends Controller
             'ime'       => 'required|string',
             'prezime'   => 'required|string',
             'fakultet'  => 'required|string',
+            'brojIndeksa' => 'required|string'
         ]);
 
         $links = $request->input('links', []);
@@ -86,6 +89,7 @@ class MobilityController extends Controller
         $ime = trim($request->input('ime'));
         $prezime = trim($request->input('prezime'));
         $fakultet = trim($request->input('fakultet'));
+        $brojIndeksa = trim($request->input('brojIndeksa'));
 
         $courseMap = [];
         foreach ($courses as $c) {
@@ -106,7 +110,7 @@ class MobilityController extends Controller
 
         $textRun = $section->addTextRun(['size' => 12]);
         $textRun->addText('Student osnovnih studija ');
-        $textRun->addText("{$ime} {$prezime}", ['bold' => true]);
+        $textRun->addText("{$ime} {$prezime} {$brojIndeksa}", ['bold' => true]);
         $textRun->addText(' će boraviti na ');
         $textRun->addText($fakultet, ['bold' => true]);
         $textRun->addText('.');

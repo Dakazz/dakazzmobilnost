@@ -25,6 +25,10 @@
 
                 <input type="text" id="fakultet" name="fakultet" value="{{ old('fakultet') }}" placeholder="Faculty Name"
                     class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+
+                <input type="text" id="broj_indeksa" name="broj_indeksa" value="{{ old('broj_indeksa') }}" placeholder="Broj indeksa"
+                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+
             </div>
 
 
@@ -36,6 +40,8 @@
                     <input type="hidden" name="ime" id="hiddenIme">
                     <input type="hidden" name="prezime" id="hiddenPrezime">
                     <input type="hidden" name="fakultet" id="hiddenFakultet">
+                    <input type="hidden" name="broj_indeksa" id="hiddenBrojIndeksa">
+
 
                     <input type="file" name="word_file" accept=".doc,.docx" class="hidden" id="wordFileInput">
                     <button type="button" class="btn bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg" onclick="document.getElementById('wordFileInput').click()">
@@ -234,6 +240,7 @@
             document.getElementById('hiddenIme').value = document.getElementById('ime').value;
             document.getElementById('hiddenPrezime').value = document.getElementById('prezime').value;
             document.getElementById('hiddenFakultet').value = document.getElementById('fakultet').value;
+            document.getElementById('hiddenBrojIndeksa').value = document.getElementById('broj_indeksa').value;
             form.submit();
         });
 
@@ -241,9 +248,15 @@
             const ime = document.getElementById('ime')?.value.trim();
             const prezime = document.getElementById('prezime')?.value.trim();
             const fakultet = document.getElementById('fakultet')?.value.trim();
+            const brojIndeksa = document.getElementById('broj_indeksa')?.value.trim();
 
             if (!ime || !prezime || !fakultet) {
                 alert('Molimo unesite ime, prezime i fakultet prije eksportovanja.');
+                return;
+            }
+
+            if (!brojIndeksa) {
+                alert('Molimo unesite broj indeksa prije nastavka.');
                 return;
             }
 
@@ -270,6 +283,7 @@
                     ime,
                     prezime,
                     fakultet,
+                    brojIndeksa,
                     links: plainLinks,
                     courses: uploadedCourses
                 })
@@ -296,9 +310,15 @@
         const ime = document.getElementById('ime')?.value.trim();
         const prezime = document.getElementById('prezime')?.value.trim();
         const fakultet = document.getElementById('fakultet')?.value.trim();
-
+        const brojIndeksa = document.getElementById('broj_indeksa')?.value.trim();
+      
         if (!ime || !prezime || !fakultet) {
             alert('Molimo unesite ime, prezime i fakultet prije cuvanja.');
+            return;
+        }
+
+        if (!brojIndeksa) {
+            alert('Molimo unesite broj indeksa prije nastavka.');
             return;
         }
 
@@ -326,6 +346,7 @@
                 ime,
                 prezime,
                 fakultet,
+                broj_indeksa: brojIndeksa,
                 links: plainLinks,
                 courses: uploadedCourses
             })
