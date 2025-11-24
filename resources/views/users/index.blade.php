@@ -20,10 +20,19 @@
 
     <div class="py-10 max-w-6xl mx-auto px-6">
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">User Management</h1>
+            <h1 class="text-2xl font-bold text-gray-800">Korisnici</h1>
             <button id="addUserBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg">
-                Add User
+                Dodaj korisnika
             </button>
+        </div>
+
+        <div class="mb-4">
+            <input 
+                type="text" 
+                id="searchUser" 
+                placeholder="Pretrazi.." 
+                class="w-full max-w-md border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+            >
         </div>
 
         <div class="overflow-x-auto bg-white shadow rounded-lg">
@@ -39,7 +48,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200" id="userTableBody">
                     @foreach ($users as $user)
-                        <tr>
+                        <tr class="user-row" data-search="{{ strtolower($user->id . ' ' . $user->name . ' ' . $user->email . ' ' . (($user->type == 0) ? 'admin' : 'profesor')) }}">
                             <td class="px-4 py-3 text-sm text-gray-800">{{ $user->id }}</td>
                             <td class="px-4 py-3 text-sm text-gray-800">{{ $user->name }}</td>
                             <td class="px-4 py-3 text-sm text-gray-800">{{ $user->email }}</td>
@@ -175,5 +184,25 @@
         document.getElementById('password').required = false;
     }
 
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchUser');
+        const rows = document.querySelectorAll('.user-row');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            rows.forEach(row => {
+                const searchText = row.getAttribute('data-search');
+                if (searchText.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
     </script>
 </x-app-layout>
