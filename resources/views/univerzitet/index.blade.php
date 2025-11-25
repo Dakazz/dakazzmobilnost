@@ -21,6 +21,15 @@
 </button>
         </div>
 
+        <div class="mb-4">
+            <input 
+                type="text" 
+                id="searchUniversity" 
+                placeholder="Pretrazi.." 
+                class="w-full max-w-md border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+            >
+        </div>
+
         <div class="overflow-x-auto bg-white shadow rounded-lg">
             <table class="min-w-full border border-gray-200">
                 <thead class="bg-gray-100">
@@ -34,7 +43,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @foreach($univerziteti as $u)
-                        <tr class="bg-white">
+                        <tr class="bg-white university-row" data-search="{{ strtolower($u->naziv . ' ' . $u->drzava . ' ' . $u->grad . ' ' . $u->email) }}">
                             <td class="px-4 py-3 text-sm text-gray-800">{{ $u->naziv }}</td>
                             <td class="px-4 py-3 text-sm text-gray-800">{{ $u->drzava }}</td>
                             <td class="px-4 py-3 text-sm text-gray-800">{{ $u->grad }}</td>
@@ -196,6 +205,26 @@ document.addEventListener('DOMContentLoaded', function () {
     cancelAdd.addEventListener('click', () => {
         addModal.classList.add('hidden');
         addModal.classList.remove('flex');
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchUniversity');
+    const rows = document.querySelectorAll('.university-row');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        rows.forEach(row => {
+            const searchText = row.getAttribute('data-search');
+            if (searchText.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     });
 });
 </script>
