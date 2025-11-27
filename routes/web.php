@@ -16,7 +16,7 @@ Route::get('/', function () {
         return redirect()->route('login');
     }
 
-    return match ((int)$user->type) {
+    return match ((int) $user->type) {
         0 => redirect()->route('adminDashboardShow'),
         1 => redirect()->route('profesorDashboardShow'),
     };
@@ -28,20 +28,22 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware('adminAuth')->prefix('admin')->group(function(){
+Route::middleware('adminAuth')->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])->name('adminDashboardShow');
 
     Route::get('/mobilnost', [MobilityController::class, 'index'])->name('admin.mobility');
     Route::post('/mobilnost', [MobilityController::class, 'upload'])->name('admin.mobility.upload');
     Route::post('/mobilnost/export', [MobilityController::class, 'export'])->name('admin.mobility.export');
     Route::post('/mobility/save', [MobilityController::class, 'save'])->name('admin.mobility.save');
+    Route::get('/mobility/{id}', [MobilityController::class, 'show'])->name('admin.mobility.show');
+    Route::post('/mobility/grade/{id}', [MobilityController::class, 'updateGrade'])->name('admin.mobility.update-grade');
 
     Route::get('/users/', [UserController::class, 'index'])->name('users.index');
     Route::post('/users/', [UserController::class, 'store'])->name('users.store');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
- 
+
     Route::get('/univerzitet', [UniverzitetController::class, 'index'])->name('univerzitet.index');
     Route::get('/univerzitet/create', [UniverzitetController::class, 'create'])->name('univerzitet.create');
     Route::post('/univerzitet', [UniverzitetController::class, 'store'])->name('univerzitet.store');
@@ -52,7 +54,7 @@ Route::middleware('adminAuth')->prefix('admin')->group(function(){
     Route::resource('prepisi', \App\Http\Controllers\PrepisController::class)->names('prepis');
 });
 
-Route::middleware('profesorAuth')->prefix('profesor')->group(function(){
+Route::middleware('profesorAuth')->prefix('profesor')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'profesorDashboard'])->name('profesorDashboardShow');
 
     Route::get('/mobilnost', [MobilityController::class, 'index'])->name('profesor.mobility');
@@ -61,4 +63,4 @@ Route::middleware('profesorAuth')->prefix('profesor')->group(function(){
     Route::post('/mobility/save', [MobilityController::class, 'save'])->name('profesor.mobility.save');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
