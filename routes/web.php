@@ -8,6 +8,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UniverzitetController;
 
+Route::get('/dbtest', function () {
+    try {
+        \DB::connection()->getPdo();
+        return 'DB OK';
+    } catch (\Exception $e) {
+        return 'DB ERROR: ' . $e->getMessage();
+    }
+});
+
+
+
 
 Route::get('/', function () {
     $user = Auth::user();
