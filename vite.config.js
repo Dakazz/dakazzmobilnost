@@ -8,8 +8,8 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    base: '/build/',  // dodaj /build/ kako bi bili sigurni da su svi resursi sa pravilnim putem
     server: {
-        https: true,  // osiguraj da je Vite server postavljen na HTTPS (ako se koristi lokalno ili u razvoju)
+        https: true,
     },
+    base: '/', 
 });
