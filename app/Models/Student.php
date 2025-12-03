@@ -20,6 +20,15 @@ class Student extends Model
         'nivo_studija_id'
     ];
 
+    protected $casts = [
+        'datum_rodjenja' => 'date',
+    ];
+
+    public function getPunoImeAttribute()
+    {
+        return $this->ime . ' ' . $this->prezime;
+    }
+
     public function nivoStudija()
     {
         return $this->belongsTo(NivoStudija::class, 'nivo_studija_id');

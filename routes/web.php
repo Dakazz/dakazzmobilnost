@@ -81,6 +81,8 @@ Route::middleware('adminAuth')->prefix('admin')->group(function () {
     Route::post('/predmeti', [\App\Http\Controllers\PredmetController::class, 'store'])->name('predmeti.store');
     Route::put('/predmeti/{id}', [\App\Http\Controllers\PredmetController::class, 'update'])->name('predmeti.update');
     Route::delete('/predmeti/{id}', [\App\Http\Controllers\PredmetController::class, 'destroy'])->name('predmeti.destroy');
+
+    Route::resource('studenti', \App\Http\Controllers\StudentController::class)->names('studenti');
 });
 
 Route::middleware('profesorAuth')->prefix('profesor')->group(function () {
