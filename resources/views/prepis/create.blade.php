@@ -49,7 +49,7 @@
                                     <h5 class="font-semibold mb-2 text-sm">Trenutni predmet</h5>
                                     <div id="trenutnis" class="border border-gray-400 min-h-[200px] p-2 rounded drop-zone bg-white overflow-y-auto max-h-[300px]"></div>
                                     <div class="mt-2 text-sm font-semibold border-t pt-2">
-                                        <span>Ukupno: </span><span id="ukupno-strani-ects">0</span> ECTS
+                                        <span>Ukupno: <span id="ukupno-strani-ects">0</span> ECTS</span>
                                     </div>
                                 </div>
                             </div>
@@ -62,9 +62,12 @@
                                     <h5 class="font-semibold mb-2 text-sm">Trenutni predmet</h5>
                                     <div id="trenutnid" class="border border-gray-400 min-h-[200px] p-2 rounded drop-zone bg-white overflow-y-auto max-h-[300px]"></div>
                                     <div class="mt-2 text-sm font-semibold border-t pt-2">
-                                        <span>Ukupno: </span><span id="ukupno-domaci-ects">0</span> ECTS
+                                        <span>Ukupno: <span id="ukupno-domaci-ects">0</span> ECTS</span>
                                     </div>
-                                    <button type="button" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm" id="potvrdi">Potvrdi</button>
+                                    <div class="mt-3 flex gap-2">
+                                        <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm flex-1" id="potvrdi">Potvrdi</button>
+                                        <button type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm" id="automec-btn">Automeč</button>
+                                    </div>
                                 </div>
                                 <div style="max-width: 250px;">
                                     <h5 class="font-semibold mb-2 text-sm">Domaći univerzitet</h5>
@@ -88,9 +91,9 @@
                             <table class="w-full border-collapse border border-gray-300 bg-white">
                                 <thead class="bg-gray-200">
                                     <tr>
-                                        <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">FIT Predmet</th>
+                                        <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700 w-1/2">FIT Predmet</th>
                                         <th class="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-24">ECTS</th>
-                                        <th class="border-l-4 border-l-gray-500 border-r border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Strani Predmet</th>
+                                        <th class="border-l-4 border-l-gray-500 border-r border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700 w-1/2">Strani Predmet</th>
                                         <th class="border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-700 w-24">ECTS</th>
                                     </tr>
                                 </thead>
@@ -104,12 +107,12 @@
                                 </tbody>
                                 <tfoot class="bg-gray-100">
                                     <tr>
-                                        <td class="border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700" colspan="2">Ukupno FIT ECTS</td>
-                                        <td class="border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700" colspan="2">Ukupno Strani ECTS</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="border border-gray-300 px-4 py-3 text-center text-sm font-bold text-gray-800" colspan="2" id="ukupno-fit-ects">0</td>
-                                        <td class="border border-gray-300 px-4 py-3 text-center text-sm font-bold text-gray-800" colspan="2" id="ukupno-strani-macovanje-ects">0</td>
+                                        <td class="border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700" colspan="2">
+                                            <span>Ukupno FIT ECTS: <span id="ukupno-fit-ects">0</span></span>
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700" colspan="2">
+                                            <span>Ukupno Strani ECTS: <span id="ukupno-strani-macovanje-ects">0</span></span>
+                                        </td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -132,9 +135,8 @@
         const fakultetSelect = document.getElementById('fakultet_id');
         const macovanjeTable = document.getElementById('macovanje');
         
-        // Store original items for restoration
-        const originalStraniItems = new Map();
-        const originalDomaciItems = new Map();
+        // Store all matched pairs from macovanje table
+        const macovanjePairs = [];
 
         function populateForeignSubjects(selectElement, facultyId) {
             selectElement.innerHTML = '<option value="">Odaberite strani predmet</option>';
@@ -195,49 +197,23 @@
             document.getElementById('ukupno-domaci-ects').textContent = domaciTotal;
         }
 
-        function updateMacovanjeTable() {
-            macovanjeTable.innerHTML = '';
-            const trenutnis = document.getElementById('trenutnis');
-            const trenutnid = document.getElementById('trenutnid');
-            
-            const straniItems = Array.from(trenutnis.querySelectorAll('.dropped-item'));
-            const domaciItems = Array.from(trenutnid.querySelectorAll('.dropped-item'));
-            
-            let hasData = false;
+        function updateMacovanjeTableTotals() {
             let totalFitEcts = 0;
             let totalStraniEcts = 0;
             
-            // Many-to-many matching: create all combinations
-            straniItems.forEach(straniItem => {
-                domaciItems.forEach(domaciItem => {
-                    hasData = true;
-                    const straniName = straniItem.dataset.name || '';
-                    const straniEcts = parseInt(straniItem.dataset.ects) || 0;
-                    const domaciName = domaciItem.dataset.name || '';
-                    const domaciEcts = parseInt(domaciItem.dataset.ects) || 0;
-                    
-                    totalFitEcts += domaciEcts;
-                    totalStraniEcts += straniEcts;
-                    
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gray-50 transition-colors';
-                    tr.dataset.fitId = domaciItem.dataset.id;
-                    tr.dataset.straniId = straniItem.dataset.id;
-                    tr.innerHTML = `
-                        <td class="border border-gray-300 px-4 py-3 text-sm text-gray-800">${domaciName}</td>
-                        <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${domaciEcts}</td>
-                        <td class="border-l-4 border-l-gray-500 border-r border-gray-300 px-4 py-3 text-sm text-gray-800">${straniName}</td>
-                        <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${straniEcts}</td>
-                    `;
-                    macovanjeTable.appendChild(tr);
-                });
+            macovanjePairs.forEach(pair => {
+                totalFitEcts += parseInt(pair.fitEcts) || 0;
+                totalStraniEcts += parseInt(pair.straniEcts) || 0;
             });
             
-            // Update totals in footer
             document.getElementById('ukupno-fit-ects').textContent = totalFitEcts;
             document.getElementById('ukupno-strani-macovanje-ects').textContent = totalStraniEcts;
+        }
+
+        function renderMacovanjeTable() {
+            macovanjeTable.innerHTML = '';
             
-            if (!hasData) {
+            if (macovanjePairs.length === 0) {
                 const emptyRow = document.createElement('tr');
                 emptyRow.id = 'empty-row';
                 emptyRow.innerHTML = `
@@ -246,8 +222,77 @@
                     </td>
                 `;
                 macovanjeTable.appendChild(emptyRow);
+                updateMacovanjeTableTotals();
+                return;
             }
+            
+            macovanjePairs.forEach((pair, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                tr.dataset.pairIndex = index;
+                tr.innerHTML = `
+                    <td class="border border-gray-300 px-4 py-3 text-sm text-gray-800 w-1/2">
+                        ${pair.fitName}
+                        <button type="button" class="ml-2 text-red-600 hover:text-red-900 text-xs" onclick="removeFromMacovanje(${index})">×</button>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${pair.fitEcts}</td>
+                    <td class="border-l-4 border-l-gray-500 border-r border-gray-300 px-4 py-3 text-sm text-gray-800 w-1/2">
+                        ${pair.straniName}
+                        <button type="button" class="ml-2 text-red-600 hover:text-red-900 text-xs" onclick="removeFromMacovanje(${index})">×</button>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${pair.straniEcts}</td>
+                `;
+                macovanjeTable.appendChild(tr);
+            });
+            
+            updateMacovanjeTableTotals();
         }
+
+        // Function to remove pair from macovanje and restore to trenutni predmet
+        window.removeFromMacovanje = function(index) {
+            const pair = macovanjePairs[index];
+            if (!pair) return;
+            
+            // Restore FIT predmet to listaDomaci if not already there
+            const fitExists = document.querySelector(`#listaDomaci .drag-item[data-id="${pair.fitId}"]`);
+            if (!fitExists) {
+                const fitRow = document.createElement('div');
+                fitRow.className = 'drag-item border border-gray-300 mb-1 rounded bg-white cursor-move hover:bg-gray-100 transition overflow-hidden';
+                fitRow.draggable = true;
+                fitRow.dataset.id = pair.fitId;
+                fitRow.dataset.name = pair.fitName;
+                fitRow.dataset.ects = pair.fitEcts;
+                fitRow.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-1 p-2 text-xs">${pair.fitName}</div>
+                        <div class="border-l border-gray-300 px-2 py-2 text-xs font-semibold bg-gray-200 w-12 text-center">${pair.fitEcts}</div>
+                    </div>
+                `;
+                listaDomaci.appendChild(fitRow);
+            }
+            
+            // Restore strani predmet to listaStrani if not already there
+            const straniExists = document.querySelector(`#listaStrani .drag-item[data-id="${pair.straniId}"]`);
+            if (!straniExists) {
+                const straniRow = document.createElement('div');
+                straniRow.className = 'drag-item border border-gray-300 mb-1 rounded bg-white cursor-move hover:bg-gray-100 transition overflow-hidden';
+                straniRow.draggable = true;
+                straniRow.dataset.id = pair.straniId;
+                straniRow.dataset.name = pair.straniName;
+                straniRow.dataset.ects = pair.straniEcts;
+                straniRow.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-1 p-2 text-xs">${pair.straniName}</div>
+                        <div class="border-l border-gray-300 px-2 py-2 text-xs font-semibold bg-gray-200 w-12 text-center">${pair.straniEcts}</div>
+                    </div>
+                `;
+                listaStrani.appendChild(straniRow);
+            }
+            
+            // Remove from macovanjePairs
+            macovanjePairs.splice(index, 1);
+            renderMacovanjeTable();
+        };
 
         fakultetSelect.addEventListener('change', updateAllForeignSubjects);
 
@@ -413,7 +458,6 @@
                         restoreItemToOriginalList(clonedItem, isStrani);
                         clonedItem.remove();
                         updateTotalEcts();
-                        updateMacovanjeTable();
                     };
                     
                     clonedItem.style.position = 'relative';
@@ -425,7 +469,6 @@
                     draggedItem.remove();
                     
                     updateTotalEcts();
-                    updateMacovanjeTable();
                 }
                 
                 draggedItem = null;
@@ -433,16 +476,132 @@
             });
         });
         
-        // Potvrdi dugme - now just updates the table
+        // Potvrdi dugme - transfer to macovanje table and clear trenutni predmet
         document.getElementById('potvrdi').addEventListener('click', function() {
-            updateMacovanjeTable();
+            const trenutnis = document.getElementById('trenutnis');
+            const trenutnid = document.getElementById('trenutnid');
+            
+            const straniItems = Array.from(trenutnis.querySelectorAll('.dropped-item'));
+            const domaciItems = Array.from(trenutnid.querySelectorAll('.dropped-item'));
+            
+            if (straniItems.length === 0 || domaciItems.length === 0) {
+                alert('Morate imati predmete u oba trenutna predmeta!');
+                return;
+            }
+            
+            // Create all combinations (many-to-many)
+            straniItems.forEach(straniItem => {
+                domaciItems.forEach(domaciItem => {
+                    macovanjePairs.push({
+                        fitId: domaciItem.dataset.id,
+                        fitName: domaciItem.dataset.name,
+                        fitEcts: domaciItem.dataset.ects,
+                        straniId: straniItem.dataset.id,
+                        straniName: straniItem.dataset.name,
+                        straniEcts: straniItem.dataset.ects
+                    });
+                });
+            });
+            
+            // Clear trenutni predmet tables and restore items to original lists
+            straniItems.forEach(item => {
+                restoreItemToOriginalList(item, true);
+                item.remove();
+            });
+            
+            domaciItems.forEach(item => {
+                restoreItemToOriginalList(item, false);
+                item.remove();
+            });
+            
+            updateTotalEcts();
+            renderMacovanjeTable();
+        });
+        
+        // Automec functionality
+        document.getElementById('automec-btn').addEventListener('click', async function() {
+            const fakultetId = fakultetSelect.value;
+            if (!fakultetId) {
+                alert('Selektuj fakultet prvo');
+                return;
+            }
+
+            const trenutnis = document.getElementById('trenutnis');
+            const straniItems = Array.from(trenutnis.querySelectorAll('.dropped-item'));
+            
+            if (straniItems.length === 0) {
+                alert('Selektuj bar jedan strani predmet u trenutnom predmetu');
+                return;
+            }
+
+            const straniPredmetIds = straniItems.map(item => item.dataset.id);
+
+            try {
+                const response = await fetch('{{ route("prepis.automec-sugestija") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        strani_predmet_ids: straniPredmetIds,
+                        fakultet_id: fakultetId
+                    })
+                });
+
+                const suggestions = await response.json();
+                const trenutnid = document.getElementById('trenutnid');
+                
+                // Clear existing items in trenutnid
+                trenutnid.querySelectorAll('.dropped-item').forEach(item => {
+                    restoreItemToOriginalList(item, false);
+                    item.remove();
+                });
+                
+                // Add suggested FIT predmeti to trenutnid
+                Object.values(suggestions).forEach(suggestion => {
+                    const fitSubject = allSubjects.find(s => s.id == suggestion.fit_predmet_id);
+                    if (fitSubject) {
+                        // Check if already in trenutnid
+                        const exists = trenutnid.querySelector(`.dropped-item[data-id="${fitSubject.id}"]`);
+                        if (exists) return;
+                        
+                        // Remove from listaDomaci if exists
+                        const fromList = listaDomaci.querySelector(`.drag-item[data-id="${fitSubject.id}"]`);
+                        if (fromList) fromList.remove();
+                        
+                        const clonedItem = document.createElement('div');
+                        clonedItem.className = 'dropped-item border border-gray-300 mb-1 rounded bg-white relative';
+                        clonedItem.dataset.id = fitSubject.id;
+                        clonedItem.dataset.name = fitSubject.naziv;
+                        clonedItem.dataset.ects = fitSubject.ects;
+                        clonedItem.innerHTML = `
+                            <div class="flex">
+                                <div class="flex-1 p-2 text-xs">${fitSubject.naziv}</div>
+                                <div class="border-l border-gray-300 px-2 py-2 text-xs font-semibold bg-gray-200 w-12 text-center">${fitSubject.ects}</div>
+                            </div>
+                            <button type="button" class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 rounded-full text-xs font-bold hover:bg-red-600" style="font-size: 10px;" onclick="this.closest('.dropped-item').remove(); updateTotalEcts();">X</button>
+                        `;
+                        trenutnid.appendChild(clonedItem);
+                    }
+                });
+                
+                updateTotalEcts();
+
+                if (Object.keys(suggestions).length > 0) {
+                    alert('Mačovanje pokrenuto! Predloženi FIT predmeti su dodati u trenutni predmet.');
+                } else {
+                    alert('Nema predmeta za mačovanje.');
+                }
+            } catch (error) {
+                console.error('Greška:', error);
+                alert('Greška prilikom mečovanja. Probaj opet.');
+            }
         });
         
         // Form submission - save from macovanje table
         document.getElementById('prepis-form').addEventListener('submit', function(e) {
-            const rows = macovanjeTable.querySelectorAll('tr[data-fit-id][data-strani-id]');
-            
-            if (rows.length === 0) {
+            if (macovanjePairs.length === 0) {
                 e.preventDefault();
                 alert('Morate imati najmanje jedno uparivanje u tabeli mačovanja!');
                 return;
@@ -451,21 +610,18 @@
             // Clear existing agreements
             agreementsContainer.innerHTML = '';
             
-            // Create hidden inputs from macovanje table
-            rows.forEach((row, index) => {
-                const fitId = row.dataset.fitId;
-                const straniId = row.dataset.straniId;
-                
+            // Create hidden inputs from macovanjePairs
+            macovanjePairs.forEach((pair, index) => {
                 const fitInput = document.createElement('input');
                 fitInput.type = 'hidden';
                 fitInput.name = `agreements[${index}][fit_predmet_id]`;
-                fitInput.value = fitId;
+                fitInput.value = pair.fitId;
                 agreementsContainer.appendChild(fitInput);
                 
                 const straniInput = document.createElement('input');
                 straniInput.type = 'hidden';
                 straniInput.name = `agreements[${index}][strani_predmet_id]`;
-                straniInput.value = straniId;
+                straniInput.value = pair.straniId;
                 agreementsContainer.appendChild(straniInput);
             });
         });
@@ -479,5 +635,6 @@
         populateDomaciList();
         populateStraniList();
         updateTotalEcts();
+        renderMacovanjeTable();
     </script>
 </x-app-layout>
