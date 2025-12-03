@@ -26,6 +26,10 @@
                             {{ __('User') }}
                         </x-nav-link>  
 
+                        <x-nav-link :href="route('studenti.index')" :active="request()->routeIs('studenti.*')">
+                            {{ __('Studenti') }}
+                        </x-nav-link>
+
                         <x-nav-link :href="route('admin.mobility')" :active="request()->routeIs('admin.mobility')">
                             {{ __('Mobilnost') }}
                         </x-nav-link>
@@ -118,6 +122,10 @@
 
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
                     {{ __('User') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('studenti.index')" :active="request()->routeIs('studenti.*')">
+                    {{ __('Studenti') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link :href="route('admin.mobility')" :active="request()->routeIs('admin.mobility')">
