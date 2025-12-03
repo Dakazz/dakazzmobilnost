@@ -632,7 +632,10 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'App\\Http\\Controllers\\Auth\\VerifyEmailController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/VerifyEmailController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/DashboardController.php',
+        'App\\Http\\Controllers\\FakultetController' => __DIR__ . '/../..' . '/app/Http/Controllers/FakultetController.php',
         'App\\Http\\Controllers\\MobilityController' => __DIR__ . '/../..' . '/app/Http/Controllers/MobilityController.php',
+        'App\\Http\\Controllers\\PredmetController' => __DIR__ . '/../..' . '/app/Http/Controllers/PredmetController.php',
+        'App\\Http\\Controllers\\PrepisController' => __DIR__ . '/../..' . '/app/Http/Controllers/PrepisController.php',
         'App\\Http\\Controllers\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProfileController.php',
         'App\\Http\\Controllers\\UniverzitetController' => __DIR__ . '/../..' . '/app/Http/Controllers/UniverzitetController.php',
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
@@ -645,6 +648,11 @@ class ComposerStaticInitc514d8f7b9fc5970bdd94287905ef584
         'App\\Models\\Mobilnost' => __DIR__ . '/../..' . '/app/Models/Mobilnost.php',
         'App\\Models\\NivoStudija' => __DIR__ . '/../..' . '/app/Models/NivoStudija.php',
         'App\\Models\\Predmet' => __DIR__ . '/../..' . '/app/Models/Predmet.php',
+<<<<<<< HEAD
+=======
+        'App\\Models\\Prepis' => __DIR__ . '/../..' . '/app/Models/Prepis.php',
+        'App\\Models\\PrepisAgreement' => __DIR__ . '/../..' . '/app/Models/PrepisAgreement.php',
+>>>>>>> upstream/main
         'App\\Models\\Student' => __DIR__ . '/../..' . '/app/Models/Student.php',
         'App\\Models\\Univerzitet' => __DIR__ . '/../..' . '/app/Models/Univerzitet.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',

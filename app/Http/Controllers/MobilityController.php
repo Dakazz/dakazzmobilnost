@@ -199,6 +199,21 @@ class MobilityController extends Controller
             $table->addCell(2000)->addText($header, ['bold' => true]);
         }
 
+        $allForeignSubjects = [];
+        foreach ($links as $linked) {
+            $allForeignSubjects = array_merge($allForeignSubjects, $linked);
+        }
+        $allForeignSubjects = array_unique($allForeignSubjects);
+
+        $fakultetModel = \App\Models\Fakultet::where('naziv', $fakultet)->first();
+        $foreignSubjectEcts = collect();
+        
+        if ($fakultetModel) {
+            $foreignSubjectEcts = \App\Models\Predmet::whereIn('naziv', $allForeignSubjects)
+                ->where('fakultet_id', $fakultetModel->id)
+                ->pluck('ects', 'naziv');
+        }
+
         $rowNum = 1;
         foreach ($links as $fitSubject => $linkedSubjects) {
             if (empty($linkedSubjects))
@@ -221,7 +236,13 @@ class MobilityController extends Controller
                 }
             }
 
-            $table->addCell(800)->addText('/');
+            $totalEcts = 0;
+            foreach ($linkedSubjects as $subj) {
+                $subj = trim($subj);
+                $totalEcts += $foreignSubjectEcts[$subj] ?? 0;
+            }
+
+            $table->addCell(800)->addText($totalEcts);
         }
 
         $section->addTextBreak(2);
