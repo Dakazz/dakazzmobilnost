@@ -116,15 +116,20 @@
             <label for="nivo_studija_id" class="block text-gray-700 font-medium mb-1">Nivo studija <span class="text-red-500">*</span></label>
             <select id="nivo_studija_id" 
                     name="nivo_studija_id"
-                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                    required>
+                    class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 bg-white"
+                    required
+                    style="appearance: auto; -webkit-appearance: menulist; -moz-appearance: menulist;">
                 <option value="">Izaberi nivo studija</option>
-                @foreach($nivoiStudija as $nivo)
-                    <option value="{{ $nivo->id }}" 
-                            {{ old('nivo_studija_id', $student->nivo_studija_id ?? '') == $nivo->id ? 'selected' : '' }}>
-                        {{ $nivo->naziv }}
-                    </option>
-                @endforeach
+                @if(isset($nivoiStudija) && $nivoiStudija->count() > 0)
+                    @foreach($nivoiStudija as $nivo)
+                        <option value="{{ $nivo->id }}" 
+                                {{ old('nivo_studija_id', isset($student) ? $student->nivo_studija_id : '') == $nivo->id ? 'selected' : '' }}>
+                            {{ $nivo->naziv }}
+                        </option>
+                    @endforeach
+                @else
+                    <option value="" disabled>Nema dostupnih nivoa studija</option>
+                @endif
             </select>
             @error('nivo_studija_id')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
