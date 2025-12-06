@@ -1,5 +1,5 @@
 # ============================================================
-# 1) BUILD STAGE — Composer + NPM + Vite buildd
+# 1) BUILD STAGE — Composer + NPM + Vite build
 # ============================================================
 FROM php:8.2-apache as build
 
@@ -21,21 +21,23 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Working directory
 WORKDIR /app
 
-# Copy all files for build
+# Copy project files
 COPY . .
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Install JS deps + build Vite assets
+# Install JS dependencies + build Vite assets
 RUN npm ci && npm run build
+
+
 
 # ============================================================
 # 2) PRODUCTION STAGE — Apache + Laravel
 # ============================================================
 FROM php:8.2-apache
 
-# System dependencies (same as before)
+# System dependencies
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
@@ -47,9 +49,9 @@ RUN apt-get update && apt-get install -y \
 RUN a2enmod rewrite
 
 # Set DocumentRoot to Laravel public folder
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache/apache2/sites-available/000-default.conf
 
-# Set ServerName to suppress warning
+# ServerName to suppress Apache warnings
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Working directory
@@ -58,10 +60,15 @@ WORKDIR /var/www/html
 # Copy built project from build stage
 COPY --from=build /app /var/www/html
 
-# Set permissions
+# Permissions
 RUN chmod -R 775 storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
-EXPOSE 80
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-CMD ["apache2-foreground"]
+# Use entrypoint to run migrations automatically
+ENTRYPOINT ["/entrypoint.sh"]
+
+EXPOSE 80
