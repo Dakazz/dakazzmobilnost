@@ -1,4 +1,7 @@
-@php($editing = isset($student))
+@php
+
+$editing = isset($student);
+@endphp
 
 <form method="POST" action="{{ $editing ? route('studenti.update', $student->id) : route('studenti.store') }}" id="student-form">
     @csrf
