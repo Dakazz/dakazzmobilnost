@@ -146,19 +146,34 @@ $editing = isset($student);
 
         <!-- Desno polje - Predmeti -->
         <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Predmeti</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Predmeti</h3>
+                <select id="fakultet-filter" 
+                        class="border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm bg-white">
+                    <option value="">Svi fakulteti</option>
+                    @if(isset($fakulteti) && $fakulteti->count() > 0)
+                        @foreach($fakulteti as $fakultet)
+                            <option value="{{ $fakultet->id }}" 
+                                    {{ (isset($fitFakultet) && $fitFakultet && $fitFakultet->id == $fakultet->id) ? 'selected' : '' }}>
+                                {{ $fakultet->naziv }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
             
             <div class="border border-gray-300 rounded-lg p-4 max-h-[600px] overflow-y-auto bg-gray-50">
                 @if(isset($predmeti) && $predmeti->count() > 0)
-                    <div class="space-y-3">
+                    <div class="space-y-2" id="predmeti-container">
                         @foreach($predmeti as $predmet)
                             @php
                                 $studentPredmet = isset($student) ? $student->predmeti->where('id', $predmet->id)->first() : null;
                                 $polozen = old("predmeti.{$predmet->id}.polozen", $studentPredmet ? ($studentPredmet->pivot->polozen ?? false) : false);
                                 $ocjena = old("predmeti.{$predmet->id}.ocjena", $studentPredmet ? ($studentPredmet->pivot->ocjena ?? '') : '');
                             @endphp
-                            <div class="bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
-                                <div class="flex items-center gap-3">
+                            <div class="bg-white border border-gray-200 rounded-lg p-2 hover:bg-gray-50 predmet-item" 
+                                 data-fakultet-id="{{ $predmet->fakultet_id ?? '' }}">
+                                <div class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 text-sm">
                                     <input type="checkbox" 
                                            name="predmeti[{{ $predmet->id }}][polozen]" 
                                            id="predmet_{{ $predmet->id }}"
@@ -167,12 +182,11 @@ $editing = isset($student);
                                            data-predmet-id="{{ $predmet->id }}"
                                            {{ $polozen ? 'checked' : '' }}>
                                     
-                                    <label for="predmet_{{ $predmet->id }}" class="flex-1 cursor-pointer">
-                                        <div class="font-medium text-sm text-gray-800">{{ $predmet->naziv }}</div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                            ECTS: {{ $predmet->ects }} | Semestar: {{ $predmet->semestar ?? 'N/A' }}
-                                        </div>
-                                    </label>
+                                    <span class="font-medium text-gray-800 truncate" title="{{ $predmet->naziv }}">{{ $predmet->naziv }}</span>
+                                    
+                                    <span class="text-gray-600 text-xs whitespace-nowrap">Sem: {{ $predmet->semestar ?? 'N/A' }}</span>
+                                    
+                                    <span class="text-gray-600 text-xs whitespace-nowrap">ECTS: {{ $predmet->ects }}</span>
                                     
                                     <input type="number" 
                                            name="predmeti[{{ $predmet->id }}][ocjena]" 
@@ -227,4 +241,30 @@ $editing = isset($student);
             }
         });
     });
+
+    // Filter predmeti by fakultet
+    const fakultetFilter = document.getElementById('fakultet-filter');
+    const predmetiContainer = document.getElementById('predmeti-container');
+    
+    if (fakultetFilter && predmetiContainer) {
+        // Initial filter on page load (if FIT is selected by default)
+        filterPredmeti();
+        
+        fakultetFilter.addEventListener('change', filterPredmeti);
+        
+        function filterPredmeti() {
+            const selectedFakultetId = fakultetFilter.value;
+            const predmetItems = predmetiContainer.querySelectorAll('.predmet-item');
+            
+            predmetItems.forEach(item => {
+                const fakultetId = item.dataset.fakultetId;
+                
+                if (!selectedFakultetId || fakultetId === selectedFakultetId) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    }
 </script>

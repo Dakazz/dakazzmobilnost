@@ -34,7 +34,13 @@
             </div>
 
             <div class="p-6">
-                @include('studenti._form', ['student' => $student, 'nivoiStudija' => $nivoiStudija])
+                @include('studenti._form', [
+                    'student' => $student, 
+                    'nivoiStudija' => $nivoiStudija,
+                    'predmeti' => $predmeti ?? collect(),
+                    'fakulteti' => $fakulteti ?? collect(),
+                    'fitFakultet' => $fitFakultet ?? null
+                ])
             </div>
         </div>
     </div>

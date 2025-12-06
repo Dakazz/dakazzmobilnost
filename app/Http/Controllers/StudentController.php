@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\NivoStudija;
 use App\Models\Predmet;
+use App\Models\Fakultet;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
@@ -24,8 +25,10 @@ class StudentController extends Controller
         NivoStudija::firstOrCreate(['naziv' => 'Master']);
         
         $nivoiStudija = NivoStudija::all();
-        $predmeti = Predmet::with('fakultet')->orderBy('naziv')->get();
-        return view('studenti.create', compact('nivoiStudija', 'predmeti'));
+        $fakulteti = Fakultet::orderBy('naziv')->get();
+        $predmeti = Predmet::with('fakultet')->orderBy('naziv')->get()->unique('id')->values();
+        $fitFakultet = Fakultet::where('naziv', 'FIT')->first();
+        return view('studenti.create', compact('nivoiStudija', 'predmeti', 'fakulteti', 'fitFakultet'));
     }
 
     public function store(Request $request)
@@ -99,9 +102,11 @@ class StudentController extends Controller
         
         $student = Student::findOrFail($id);
         $nivoiStudija = NivoStudija::all();
-        $predmeti = Predmet::with('fakultet')->orderBy('naziv')->get();
+        $fakulteti = Fakultet::orderBy('naziv')->get();
+        $predmeti = Predmet::with('fakultet')->orderBy('naziv')->get()->unique('id')->values();
+        $fitFakultet = Fakultet::where('naziv', 'FIT')->first();
         $student->load('predmeti');
-        return view('studenti.edit', compact('student', 'nivoiStudija', 'predmeti'));
+        return view('studenti.edit', compact('student', 'nivoiStudija', 'predmeti', 'fakulteti', 'fitFakultet'));
     }
 
     public function update(Request $request, $id)
