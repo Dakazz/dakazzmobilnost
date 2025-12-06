@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\NivoStudija;
+use App\Models\Predmet;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Schema;
 
 class StudentController extends Controller
 {
@@ -22,7 +24,7 @@ class StudentController extends Controller
         NivoStudija::firstOrCreate(['naziv' => 'Master']);
         
         $nivoiStudija = NivoStudija::all();
-        $predmeti = \App\Models\Predmet::with('fakultet')->orderBy('naziv')->get();
+        $predmeti = Predmet::with('fakultet')->orderBy('naziv')->get();
         return view('studenti.create', compact('nivoiStudija', 'predmeti'));
     }
 
@@ -63,13 +65,25 @@ class StudentController extends Controller
         $student = Student::create($validated);
 
         // Handle predmeti relationships
-        if ($request->has('predmeti')) {
+        if ($request->has('predmeti') && is_array($request->predmeti)) {
             foreach ($request->predmeti as $predmetId => $predmetData) {
                 if (isset($predmetData['polozen']) && $predmetData['polozen'] == '1') {
-                    $student->predmeti()->attach($predmetId, [
-                        'polozen' => true,
-                        'ocjena' => $predmetData['ocjena'] ?? null
-                    ]);
+                    try {
+                        $pivotData = [];
+                        
+                        // Check if columns exist before adding them
+                        if (Schema::hasColumn('student_predmet', 'polozen')) {
+                            $pivotData['polozen'] = true;
+                        }
+                        if (Schema::hasColumn('student_predmet', 'ocjena')) {
+                            $pivotData['ocjena'] = !empty($predmetData['ocjena']) ? (int)$predmetData['ocjena'] : null;
+                        }
+                        
+                        $student->predmeti()->attach($predmetId, $pivotData);
+                    } catch (\Exception $e) {
+                        // Log error but don't fail the entire request
+                        \Log::error('Error attaching predmet to student: ' . $e->getMessage());
+                    }
                 }
             }
         }
@@ -85,7 +99,7 @@ class StudentController extends Controller
         
         $student = Student::findOrFail($id);
         $nivoiStudija = NivoStudija::all();
-        $predmeti = \App\Models\Predmet::with('fakultet')->orderBy('naziv')->get();
+        $predmeti = Predmet::with('fakultet')->orderBy('naziv')->get();
         $student->load('predmeti');
         return view('studenti.edit', compact('student', 'nivoiStudija', 'predmeti'));
     }
@@ -130,13 +144,25 @@ class StudentController extends Controller
 
         // Sync predmeti relationships
         $student->predmeti()->detach();
-        if ($request->has('predmeti')) {
+        if ($request->has('predmeti') && is_array($request->predmeti)) {
             foreach ($request->predmeti as $predmetId => $predmetData) {
                 if (isset($predmetData['polozen']) && $predmetData['polozen'] == '1') {
-                    $student->predmeti()->attach($predmetId, [
-                        'polozen' => true,
-                        'ocjena' => $predmetData['ocjena'] ?? null
-                    ]);
+                    try {
+                        $pivotData = [];
+                        
+                        // Check if columns exist before adding them
+                        if (Schema::hasColumn('student_predmet', 'polozen')) {
+                            $pivotData['polozen'] = true;
+                        }
+                        if (Schema::hasColumn('student_predmet', 'ocjena')) {
+                            $pivotData['ocjena'] = !empty($predmetData['ocjena']) ? (int)$predmetData['ocjena'] : null;
+                        }
+                        
+                        $student->predmeti()->attach($predmetId, $pivotData);
+                    } catch (\Exception $e) {
+                        // Log error but don't fail the entire request
+                        \Log::error('Error attaching predmet to student: ' . $e->getMessage());
+                    }
                 }
             }
         }
