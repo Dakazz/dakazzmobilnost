@@ -229,54 +229,40 @@
         }
 
         function renderMacovanjeTable() {
-            macovanjeTable.innerHTML = '';
-            
-            if (macovanjePairs.length === 0) {
-                const emptyRow = document.createElement('tr');
-                emptyRow.id = 'empty-row';
-                emptyRow.innerHTML = `
-                    <td colspan="4" class="border border-gray-300 px-4 py-8 text-center text-gray-500 italic">
-                        Nema uparenih predmeta. Dodajte predmete iznad da biste vidjeli mačovanje.
-                    </td>
-                `;
-                macovanjeTable.appendChild(emptyRow);
-                updateMacovanjeTableTotals();
-                return;
-            }
-            
-            let lastBatch = -1;
-            macovanjePairs.forEach((pair, index) => {
-                // Add separator line if this is a new batch
-                if (pair.batch !== undefined && pair.batch !== lastBatch && lastBatch !== -1) {
-                    const separatorRow = document.createElement('tr');
-                    separatorRow.className = 'border-separator';
-                    separatorRow.innerHTML = `
-                        <td colspan="4" class="border-t-4 border-t-gray-600 px-4 py-2"></td>
-                    `;
-                    macovanjeTable.appendChild(separatorRow);
-                }
-                lastBatch = pair.batch !== undefined ? pair.batch : 0;
-                
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors';
-                tr.dataset.pairIndex = index;
-                tr.innerHTML = `
-                    <td class="border border-gray-300 px-4 py-3 text-sm text-gray-800 w-1/2">
-                        ${pair.straniName}
-                        <button type="button" class="ml-2 text-red-600 hover:text-red-900 text-xs" onclick="removeFromMacovanje(${index})">×</button>
-                    </td>
-                    <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${pair.straniEcts}</td>
-                    <td class="border-l-4 border-l-gray-500 border-r border-gray-300 px-4 py-3 text-sm text-gray-800 w-1/2">
-                        ${pair.fitName}
-                        <button type="button" class="ml-2 text-red-600 hover:text-red-900 text-xs" onclick="removeFromMacovanje(${index})">×</button>
-                    </td>
-                    <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${pair.fitEcts}</td>
-                `;
-                macovanjeTable.appendChild(tr);
-            });
-            
-            updateMacovanjeTableTotals();
-        }
+    macovanjeTable.innerHTML = '';
+
+    let lastStraniId = null;
+    let lastFitId = null;
+
+    macovanjePairs.forEach((pair, index) => {
+
+        const prikaziStrani = pair.straniId !== lastStraniId;
+        const prikaziFit = pair.fitId !== lastFitId;
+
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td class="border px-4 py-2">
+                ${prikaziStrani ? pair.straniName : ''}
+            </td>
+            <td class="border px-4 py-2 text-center">
+                ${prikaziStrani ? pair.straniEcts : ''}
+            </td>
+            <td class="border px-4 py-2">
+                ${prikaziFit ? pair.fitName : ''}
+            </td>
+            <td class="border px-4 py-2 text-center">
+                ${prikaziFit ? pair.fitEcts : ''}
+            </td>
+        `;
+
+        macovanjeTable.appendChild(tr);
+
+        lastStraniId = pair.straniId;
+        lastFitId = pair.fitId;
+    });
+}
+
 
         // Function to remove pair from macovanje and restore to trenutni predmet
         window.removeFromMacovanje = function(index) {
@@ -633,9 +619,6 @@
             }
         });
 
-        document.getElementById('automec-btn').addEventListener('click', async function() {
-            // ... existing automec code ...
-        });
 
         // Automec sve functionality - matches all subjects from listaStrani
         document.getElementById('automecsve-btn').addEventListener('click', async function() {
@@ -729,7 +712,7 @@
                 alert('Greška prilikom mečovanja. Probaj opet.');
             }
         });
-        
+
         // Form submission - save from macovanje table
         document.getElementById('prepis-form').addEventListener('submit', function(e) {
             if (macovanjePairs.length === 0) {
