@@ -157,65 +157,74 @@
     </div>
 
     <script>
-/* -------------------------------
+/* ===============================
    GLOBAL STATE
---------------------------------*/
-const links = {};              // { leftName : Set(rightNames) }
+================================*/
 let activeLeft = null;
+const links = {};
 const MAX_LINKS = 10;
 
-/* -------------------------------
-   DOM REFERENCES
---------------------------------*/
-const leftCards = Array.from(document.querySelectorAll('.uploaded-subject'));
-const domaciContainer = document.getElementById('domaciSubjects');
-const straniContainer = document.getElementById('availableSubjects');
+/* ===============================
+   EXISTING DOM (NE MIJENJATI)
+================================*/
+const leftCards = document.querySelectorAll('.uploaded-subject');
+const availableSubjectsContainer = document.getElementById('availableSubjects');
 const fakultetSelect = document.getElementById('fakultet_id');
 
-/* -------------------------------
-   DATA FROM BACKEND
---------------------------------*/
+/* ===============================
+   DATA (POSTOJEĆE BLADE VARIJABLE)
+================================*/
 const fitPredmeti = @json(
-    $fakulteti->firstWhere('naziv','FIT')->predmeti->pluck('naziv')
+    $fakulteti->where('naziv','FIT')->first()->predmeti->pluck('naziv')
 );
 
 const straniPredmeti = @json(
-    $fakulteti
-        ->filter(fn($f)=>$f->naziv!=='FIT')
-        ->mapWithKeys(fn($f)=>[$f->id=>$f->predmeti->pluck('naziv')])
+    $fakulteti->where('naziv','!=','FIT')->mapWithKeys(function($f){
+        return [$f->id => $f->predmeti->pluck('naziv')];
+    })
 );
 
-/* -------------------------------
-   INIT – FIT SUBJECTS ALWAYS LOADED
---------------------------------*/
-function renderFIT() {
-    domaciContainer.innerHTML = '';
+/* ===============================
+   INIT – UČITAJ FIT ODMAH
+================================*/
+window.addEventListener('DOMContentLoaded', () => {
+    loadFIT();
+    if (fakultetSelect.value) {
+        loadStrani(fakultetSelect.value);
+    }
+});
+
+/* ===============================
+   LOAD FIT (DOMAĆI)
+================================*/
+function loadFIT() {
+    availableSubjectsContainer.innerHTML = '';
+
     fitPredmeti.forEach(name => {
-        domaciContainer.appendChild(createRightCard(name));
+        availableSubjectsContainer.appendChild(createRightCard(name));
     });
 }
 
-/* -------------------------------
-   RENDER STRANI SUBJECTS
---------------------------------*/
-function renderStrani(fakId) {
-    straniContainer.innerHTML = '';
+/* ===============================
+   LOAD STRANI
+================================*/
+function loadStrani(fakId) {
+    availableSubjectsContainer.innerHTML = '';
+
     if (!straniPredmeti[fakId]) return;
 
     straniPredmeti[fakId].forEach(name => {
-        straniContainer.appendChild(createRightCard(name));
+        availableSubjectsContainer.appendChild(createRightCard(name));
     });
 }
 
-/* -------------------------------
-   CREATE RIGHT CARD
---------------------------------*/
+/* ===============================
+   RIGHT CARD
+================================*/
 function createRightCard(name) {
     const div = document.createElement('div');
     div.className =
-        'available-subject border border-gray-200 px-4 py-2 rounded-md ' +
-        'bg-gray-50 hover:bg-gray-100 cursor-pointer transition';
-
+        'available-subject border border-gray-200 px-4 py-2 rounded-md bg-gray-50 hover:bg-gray-100 cursor-pointer';
     div.dataset.name = name;
     div.textContent = name;
 
@@ -223,20 +232,19 @@ function createRightCard(name) {
     return div;
 }
 
-/* -------------------------------
-   LEFT CARD CLICK
---------------------------------*/
+/* ===============================
+   LEFT CLICK
+================================*/
 leftCards.forEach(card => {
     card.addEventListener('click', () => setActiveLeft(card));
 });
 
-/* -------------------------------
+/* ===============================
    SET ACTIVE LEFT
---------------------------------*/
+================================*/
 function setActiveLeft(card) {
-    // reset visuals
     leftCards.forEach(c =>
-        c.classList.remove('ring-2','ring-blue-500','bg-blue-50','border-blue-500')
+        c.classList.remove('ring-2','ring-blue-500','bg-blue-50')
     );
 
     document.querySelectorAll('.available-subject')
@@ -245,13 +253,13 @@ function setActiveLeft(card) {
     activeLeft = card;
     if (!card) return;
 
-    card.classList.add('ring-2','ring-blue-500','bg-blue-50','border-blue-500');
+    card.classList.add('ring-2','ring-blue-500','bg-blue-50');
     renderPillsForLeft(card);
 }
 
-/* -------------------------------
+/* ===============================
    TOGGLE LINK
---------------------------------*/
+================================*/
 function toggleLink(rightCard) {
     if (!activeLeft) return;
 
@@ -266,7 +274,6 @@ function toggleLink(rightCard) {
         set.delete(right);
         rightCard.classList.remove('border-blue-400','bg-blue-50');
     } else {
-        if (set.size >= MAX_LINKS) return;
         set.add(right);
         rightCard.classList.add('border-blue-400','bg-blue-50');
     }
@@ -274,9 +281,9 @@ function toggleLink(rightCard) {
     renderPillsForLeft(activeLeft);
 }
 
-/* -------------------------------
+/* ===============================
    RENDER PILLS (NO DUPLICATES)
---------------------------------*/
+================================*/
 function renderPillsForLeft(leftCard) {
     const wrap = leftCard.querySelector('.linked-pills');
     wrap.innerHTML = '';
@@ -284,47 +291,38 @@ function renderPillsForLeft(leftCard) {
     const leftName = leftCard.dataset.name;
     if (!links[leftName]) return;
 
-    links[leftName].forEach(rightName => {
+    links[leftName].forEach(name => {
         const pill = document.createElement('span');
         pill.className =
-            'px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs ' +
-            'flex items-center gap-1';
+            'px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-800 flex items-center gap-1';
 
         pill.innerHTML = `
-            ${rightName}
-            <button class="text-red-500 hover:text-red-700 font-bold">&times;</button>
+            ${name}
+            <button class="text-red-600 font-bold">&times;</button>
         `;
 
-        pill.querySelector('button').addEventListener('click', e => {
+        pill.querySelector('button').onclick = e => {
             e.stopPropagation();
-            links[leftName].delete(rightName);
+            links[leftName].delete(name);
             renderPillsForLeft(leftCard);
-        });
+        };
 
         wrap.appendChild(pill);
     });
 }
 
-/* -------------------------------
+/* ===============================
    FAKULTET CHANGE
---------------------------------*/
+================================*/
 fakultetSelect.addEventListener('change', () => {
-    // reset links & UI
     Object.keys(links).forEach(k => delete links[k]);
     document.querySelectorAll('.linked-pills').forEach(p => p.innerHTML = '');
     setActiveLeft(null);
 
-    renderStrani(fakultetSelect.value);
+    loadStrani(fakultetSelect.value);
 });
-
-/* -------------------------------
-   START
---------------------------------*/
-renderFIT();
-if (fakultetSelect.value) {
-    renderStrani(fakultetSelect.value);
-}
 </script>
+
 
 
 </x-app-layout>
