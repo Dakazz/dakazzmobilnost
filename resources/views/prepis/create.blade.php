@@ -229,73 +229,54 @@
         }
 
         function renderMacovanjeTable() {
-    macovanjeTable.innerHTML = '';
-
-    if (macovanjePairs.length === 0) {
-        macovanjeTable.innerHTML = `
-            <tr id="empty-row">
-                <td colspan="4" class="border border-gray-300 px-4 py-8 text-center text-gray-500 italic">
-                    Nema uparenih predmeta. Dodajte predmete iznad da biste vidjeli mačovanje.
-                </td>
-            </tr>
-        `;
-        updateMacovanjeTableTotals();
-        return;
-    }
-
-    /* -----------------------------------
-       GROUP BY BATCH
-    ----------------------------------- */
-    const grouped = {};
-    macovanjePairs.forEach(pair => {
-        const batch = pair.batch ?? 0;
-        if (!grouped[batch]) grouped[batch] = [];
-        grouped[batch].push(pair);
-    });
-
-    /* -----------------------------------
-       RENDER GROUPS
-    ----------------------------------- */
-    Object.values(grouped).forEach((group, groupIndex) => {
-
-        group.forEach((pair, indexInGroup) => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-gray-50 transition-colors';
-
-            const showStrani = indexInGroup === 0;
-            const showFit = indexInGroup === 0;
-
-            tr.innerHTML = `
-                <td class="border border-gray-300 px-4 py-3 text-sm w-1/2">
-                    ${showStrani ? pair.straniName : '&nbsp;'}
-                </td>
-                <td class="border border-gray-300 px-4 py-3 text-center text-sm">
-                    ${showStrani ? pair.straniEcts : ''}
-                </td>
-                <td class="border-l-4 border-l-gray-500 border-r border-gray-300 px-4 py-3 text-sm w-1/2">
-                    ${pair.fitName}
-                </td>
-                <td class="border border-gray-300 px-4 py-3 text-center text-sm">
-                    ${pair.fitEcts}
-                </td>
-            `;
-
-            macovanjeTable.appendChild(tr);
-        });
-
-        /* --------- GROUP SEPARATOR --------- */
-        if (groupIndex < Object.keys(grouped).length - 1) {
-            macovanjeTable.innerHTML += `
-                <tr>
-                    <td colspan="4" class="border-t-4 border-gray-600"></td>
-                </tr>
-            `;
+            macovanjeTable.innerHTML = '';
+            
+            if (macovanjePairs.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.id = 'empty-row';
+                emptyRow.innerHTML = `
+                    <td colspan="4" class="border border-gray-300 px-4 py-8 text-center text-gray-500 italic">
+                        Nema uparenih predmeta. Dodajte predmete iznad da biste vidjeli mačovanje.
+                    </td>
+                `;
+                macovanjeTable.appendChild(emptyRow);
+                updateMacovanjeTableTotals();
+                return;
+            }
+            
+            let lastBatch = -1;
+            macovanjePairs.forEach((pair, index) => {
+                // Add separator line if this is a new batch
+                if (pair.batch !== undefined && pair.batch !== lastBatch && lastBatch !== -1) {
+                    const separatorRow = document.createElement('tr');
+                    separatorRow.className = 'border-separator';
+                    separatorRow.innerHTML = `
+                        <td colspan="4" class="border-t-4 border-t-gray-600 px-1 py-2"></td>
+                    `;
+                    macovanjeTable.appendChild(separatorRow);
+                }
+                lastBatch = pair.batch !== undefined ? pair.batch : 0;
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                tr.dataset.pairIndex = index;
+                tr.innerHTML = `
+                    <td class="border border-gray-300 px-4 py-3 text-sm text-gray-800 w-1/2">
+                        ${pair.straniName}
+                        <button type="button" class="ml-2 text-red-600 hover:text-red-900 text-xs" onclick="removeFromMacovanje(${index})">×</button>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${pair.straniEcts}</td>
+                    <td class="border-l-4 border-l-gray-500 border-r border-gray-300 px-4 py-3 text-sm text-gray-800 w-1/2">
+                        ${pair.fitName}
+                        <button type="button" class="ml-2 text-red-600 hover:text-red-900 text-xs" onclick="removeFromMacovanje(${index})">×</button>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3 text-center text-sm font-medium text-gray-800">${pair.fitEcts}</td>
+                `;
+                macovanjeTable.appendChild(tr);
+            });
+            
+            updateMacovanjeTableTotals();
         }
-    });
-
-    updateMacovanjeTableTotals();
-}
-
 
         // Function to remove pair from macovanje and restore to trenutni predmet
         window.removeFromMacovanje = function(index) {
