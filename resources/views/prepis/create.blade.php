@@ -223,30 +223,43 @@
 
     // ----- Render macovanje tabele -----
     function renderMacovanjeTable() {
-        macovanjeTable.innerHTML = '';
+    macovanjeTable.innerHTML = '';
 
-        let lastStraniId = null;
-        let lastFitId = null;
+    // Grupisanje po FIT ID-u
+    const groups = {};
+    macovanjePairs.forEach(pair => {
+        if (!groups[pair.fitId]) {
+            groups[pair.fitId] = [];
+        }
+        groups[pair.fitId].push(pair);
+    });
 
-        macovanjePairs.forEach((pair, index) => {
-            const prikaziStrani = pair.straniId !== lastStraniId;
-            const prikaziFit = pair.fitId !== lastFitId;
-
+    // Prolazak kroz grupe
+    Object.values(groups).forEach((groupPairs, groupIndex) => {
+        groupPairs.forEach((pair, index) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="border px-4 py-2">${prikaziStrani ? pair.straniName : ''}</td>
-                <td class="border px-4 py-2 text-center">${prikaziStrani ? pair.straniEcts : ''}</td>
-                <td class="border px-4 py-2">${prikaziFit ? pair.fitName : ''}</td>
-                <td class="border px-4 py-2 text-center">${prikaziFit ? pair.fitEcts : ''}</td>
-            `;
-            macovanjeTable.appendChild(tr);
 
-            lastStraniId = pair.straniId;
-            lastFitId = pair.fitId;
+            tr.innerHTML = `
+                <td class="border px-4 py-2">${pair.straniName}</td>
+                <td class="border px-4 py-2 text-center">${pair.straniEcts}</td>
+                <td class="border px-4 py-2">${index === 0 ? pair.fitName : ''}</td>
+                <td class="border px-4 py-2 text-center">${index === 0 ? pair.fitEcts : ''}</td>
+            `;
+
+            macovanjeTable.appendChild(tr);
         });
 
-        updateMacovanjeTableTotals();
-    }
+        // Deblja linija između grupa, osim nakon poslednje
+        if (groupIndex < Object.keys(groups).length - 1) {
+            const separator = document.createElement('tr');
+            separator.innerHTML = `<td colspan="4" class="border-b-4 border-gray-600 p-0"></td>`;
+            macovanjeTable.appendChild(separator);
+        }
+    });
+
+    updateMacovanjeTableTotals();
+}
+
 
     // ----- Restore item back to original list -----
     function restoreItemToOriginalList(item, isStrani) {
