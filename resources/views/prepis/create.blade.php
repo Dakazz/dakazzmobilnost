@@ -633,10 +633,7 @@
             }
         });
 
-        // Automec functionality
-        document.getElementById('automec-btn').addEventListener('click', async function() {
-            // ... existing automec code ...
-        });
+
 
         // Automec sve functionality - matches all subjects from listaStrani
         document.getElementById('automecsve-btn').addEventListener('click', async function() {
