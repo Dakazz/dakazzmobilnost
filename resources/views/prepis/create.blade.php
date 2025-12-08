@@ -325,5 +325,6 @@ fakultetSelect.addEventListener('change', () => {
 
 
 
+
 </x-app-layout>
 
