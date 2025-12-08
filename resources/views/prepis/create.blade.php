@@ -312,7 +312,7 @@ function renderPillsForLeft(leftCard) {
 }
 
 /* ===============================
-   FAKULTET CHANGE
+   FAKULTET PROMJENA NA STRANIUNIVERZITETU
 ================================*/
 fakultetSelect.addEventListener('change', () => {
     Object.keys(links).forEach(k => delete links[k]);
