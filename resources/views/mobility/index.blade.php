@@ -16,6 +16,7 @@
             <div class="w-[45%] bg-white border border-gray-200 rounded-xl shadow p-6 transition-all duration-300">
                 <h2 class="text-xl font-semibold mb-4">Information</h2>
 
+                <!-- Student Pretraga -->
                 <div class="flex flex-col gap-4 mb-6">
                     <label for="student_id" class="font-semibold">Student</label>
                     <div class="relative">
@@ -43,7 +44,7 @@
                     </div>
                 </div>
 
-
+                <!-- Fakultet Pretraga -->
                 <div class="flex flex-col gap-4 mb-6">
                     <label for="fakultet_id" class="font-semibold">Fakultet</label>
                     <div class="relative">
@@ -71,7 +72,7 @@
                     </div>
                 </div>
 
-
+                <!-- Datumi -->
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="flex flex-col gap-2">
                         <label for="datum_pocetka" class="font-semibold">Datum početka</label>
@@ -87,6 +88,7 @@
                     </div>
                 </div>
 
+                <!-- Predmeti -->
                 <h3 class="text-lg font-semibold mb-3">Subjects</h3>
                 <div id="subjectList" class="subjects-container mb-3"></div>
 
@@ -96,7 +98,6 @@
                     <input type="hidden" name="prezime" id="hiddenPrezime">
                     <input type="hidden" name="fakultet" id="hiddenFakultet">
                     <input type="hidden" name="broj_indeksa" id="hiddenBrojIndeksa">
-
 
                     <input type="file" name="word_file" accept=".doc,.docx" class="hidden" id="wordFileInput">
                     <button type="button" class="btn bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg" onclick="document.getElementById('wordFileInput').click()">
@@ -114,7 +115,6 @@
                         id="saveButton">
                         Save LA
                     </button>
-
                 </form>
 
                 @if($hasCourses)
@@ -142,7 +142,6 @@
                 <h2 class="text-xl font-semibold mb-4">Available Subjects</h2>
 
                 <div id="availableSubjects" class="flex flex-col gap-3">
-                  
                 </div>
             </div>
 
@@ -165,7 +164,7 @@
         const MAX_LINKS = 4;
 
         const leftCards = Array.from(document.querySelectorAll('.uploaded-subject'));
-        const rightCards =  refreshRightCards();
+        const rightCards = refreshRightCards();
 
         const fakultetPredmeti = @json($fakulteti->mapWithKeys(function($fak) {
             return [$fak->id => $fak->predmeti->pluck('naziv')];
@@ -176,7 +175,7 @@
 
         fakultetSelect.addEventListener('change', () => {
             const fakultetId = fakultetSelect.value;
-            availableSubjectsContainer.innerHTML = ''; 
+            availableSubjectsContainer.innerHTML = '';
 
             for (const key in links) delete links[key];
             document.querySelectorAll('.linked-pills').forEach(el => el.innerHTML = '');
@@ -190,7 +189,7 @@
                 div.dataset.name = subject;
                 div.textContent = subject;
 
-                div.addEventListener('click', () => toggleLink(div)); // linkovanje sa lijevom stranom
+                div.addEventListener('click', () => toggleLink(div));
                 availableSubjectsContainer.appendChild(div);
             });
         });
@@ -202,8 +201,6 @@
         function refreshRightCards() {
             return Array.from(document.querySelectorAll('.available-subject'));
         }
-
-
 
         function clearActiveBadges() {
             document.querySelectorAll('.uploaded-subject .active-badge').forEach(el => el.remove());
@@ -220,25 +217,18 @@
         function setActiveLeft(card) {
             leftCards.forEach(c => c.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'border-blue-500', 'shadow-md'));
             clearActiveBadges();
+            document.querySelectorAll('.available-subject').forEach(c => c.classList.remove('border-blue-400', 'bg-blue-50'));
 
-            rightCards.forEach(c => c.classList.remove('border-blue-400', 'bg-blue-50'));
-
-            if (!card) {
-                activeLeft = null;
-                return;
+            if (!card) { 
+                activeLeft = null; 
+                return; 
             }
 
             activeLeft = card;
             card.classList.add('ring-2', 'ring-blue-500', 'border-blue-500', 'bg-blue-50', 'shadow-md');
             addActiveBadge(card);
 
-            const leftName = card.dataset.name;
-            const set = links[leftName] || new Set();
-            rightCards.forEach(r => {
-                if (set.has(r.dataset.name)) {
-                    r.classList.add('border-blue-400', 'bg-blue-50');
-                }
-            });
+            renderPillsForLeft(card);
         }
 
         function toggleLink(rightCard) {
@@ -247,18 +237,15 @@
             const rightName = rightCard.dataset.name;
 
             if (!links[leftName]) links[leftName] = new Set();
-
             const currentSet = links[leftName];
 
             if (currentSet.has(rightName)) {
                 currentSet.delete(rightName);
                 rightCard.classList.remove('border-blue-400', 'bg-blue-50');
             } else {
-                if (currentSet.size >= MAX_LINKS) {
-                    return;
-                }
+                if (currentSet.size >= MAX_LINKS) return;
                 currentSet.add(rightName);
-                rightCard.classList.add('border-gray-400', 'bg-blue-50');
+                rightCard.classList.add('border-blue-400', 'bg-blue-50');
             }
 
             renderPillsForLeft(activeLeft);
@@ -308,322 +295,123 @@
             card.addEventListener('click', () => toggleLink(card));
         });
 
+        // --- Pretraga studenta i fakulteta ---
+        const studentSelect = document.getElementById('student_id');
+        const studentSearchInput = document.getElementById('student_search');
+        const studentSearchResults = document.getElementById('student_search_results');
+        
+        const studentsData = Array.from(studentSelect.options)
+            .filter(option => option.value)
+            .map(option => ({
+                id: option.value,
+                text: option.text,
+                ime: option.dataset.ime,
+                prezime: option.dataset.prezime,
+                br_indexa: option.dataset.br_indexa,
+                element: option
+            }));
 
-        fileInput.addEventListener('change', () => {
-            const studentSelect = document.getElementById('student_id');
-            const selectedOption = studentSelect.options[studentSelect.selectedIndex];
-            const fakultetSelect = document.getElementById('fakultet_id');
+        if (studentSelect.value) {
+            const selected = studentsData.find(s => s.id === studentSelect.value);
+            if (selected) studentSearchInput.value = selected.text;
+        }
 
-            document.getElementById('hiddenIme').value = selectedOption?.dataset.ime || '';
-            document.getElementById('hiddenPrezime').value = selectedOption?.dataset.prezime || '';
-            document.getElementById('hiddenFakultet').value = fakultetSelect.options[fakultetSelect.selectedIndex]?.dataset.naziv || '';
-            document.getElementById('hiddenBrojIndeksa').value = selectedOption?.dataset.br_indexa || '';
-            
-            const hiddenStudentId = document.createElement('input');
-            hiddenStudentId.type = 'hidden';
-            hiddenStudentId.name = 'student_id';
-            hiddenStudentId.value = studentSelect.value;
-            form.appendChild(hiddenStudentId);
-
-            const hiddenFakultetId = document.createElement('input');
-            hiddenFakultetId.type = 'hidden';
-            hiddenFakultetId.name = 'fakultet_id';
-            hiddenFakultetId.value = fakultetSelect.value;
-            form.appendChild(hiddenFakultetId);
-
-            const hiddenDatumPocetka = document.createElement('input');
-            hiddenDatumPocetka.type = 'hidden';
-            hiddenDatumPocetka.name = 'datum_pocetka';
-            hiddenDatumPocetka.value = document.getElementById('datum_pocetka')?.value || '';
-            form.appendChild(hiddenDatumPocetka);
-
-            const hiddenDatumKraja = document.createElement('input');
-            hiddenDatumKraja.type = 'hidden';
-            hiddenDatumKraja.name = 'datum_kraja';
-            hiddenDatumKraja.value = document.getElementById('datum_kraja')?.value || '';
-            form.appendChild(hiddenDatumKraja);
-
-            form.submit();
+        studentSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            renderStudentSearchResults(studentsData.filter(s => s.text.toLowerCase().includes(query)));
         });
 
-        document.getElementById('exportButton')?.addEventListener('click', () => {
-            const studentSelect = document.getElementById('student_id');
-            const selectedOption = studentSelect.options[studentSelect.selectedIndex];
-            
-            const ime = selectedOption?.dataset.ime || '';
-            const prezime = selectedOption?.dataset.prezime || '';
-            const brojIndeksa = selectedOption?.dataset.br_indexa || '';
+        studentSearchInput.addEventListener('focus', () => {
+            const query = studentSearchInput.value.toLowerCase();
+            renderStudentSearchResults(studentsData.filter(s => s.text.toLowerCase().includes(query)));
+        });
 
-            const fakultetSelect = document.getElementById('fakultet_id');
-            const fakultet = fakultetSelect.options[fakultetSelect.selectedIndex]?.dataset.naziv || '';
-
-            if (!ime || !prezime || !fakultet) {
-                alert('Molimo unesite ime, prezime i fakultet prije eksportovanja.');
-                return;
+        document.addEventListener('click', (e) => {
+            if (!studentSearchInput.contains(e.target) && !studentSearchResults.contains(e.target)) {
+                studentSearchResults.classList.add('hidden');
             }
+        });
 
-            if (!brojIndeksa) {
-                alert('Molimo unesite broj indeksa prije nastavka.');
-                return;
-            }
-
-            const hasAnyLinks = Object.values(links).some(set => set.size > 0);
-
-            if (!hasAnyLinks) {
-                alert('Molimo povežite barem jedan predmet prije eksportovanja.');
-                return;
-            }
-
-
-            const plainLinks = {};
-            for (const [key, value] of Object.entries(links)) {
-                plainLinks[key] = Array.from(value);
-            }
-
-            fetch("{{ route(auth()->user()->type === 0 ? 'admin.mobility.export' : 'profesor.mobility.export') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                },
-                body: JSON.stringify({
-                    ime,
-                    prezime,
-                    fakultet,
-                    brojIndeksa,
-                    links: plainLinks,
-                    courses: uploadedCourses
-                })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error("Export failed");
-                return res.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const safeIme = ime.replace(/[^a-z0-9šđčćž]+/gi, '_');
-                const safePrezime = prezime.replace(/[^a-z0-9šđčćž]+/gi, '_');
-                a.download = `Mobilnost_${safeIme}_${safePrezime}.docx`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            })
-            .catch(err => alert(err.message));
-    });
-
-    document.getElementById('saveButton')?.addEventListener('click', () => {
-        const studentSelect = document.getElementById('student_id');
-        const selectedOption = studentSelect.options[studentSelect.selectedIndex];
-
-        const ime = selectedOption?.dataset.ime || '';
-        const prezime = selectedOption?.dataset.prezime || '';
-        const brojIndeksa = selectedOption?.dataset.br_indexa || '';
-
-        const fakultetSelect = document.getElementById('fakultet_id');
-        const fakultet = fakultetSelect.options[fakultetSelect.selectedIndex]?.dataset.naziv || '';
-      
-        if (!ime || !prezime || !fakultet) {
-            alert('Molimo unesite ime, prezime i fakultet prije cuvanja.');
-            return;
-        }
-
-        if (!brojIndeksa) {
-            alert('Molimo unesite broj indeksa prije nastavka.');
-            return;
-        }
-
-        const hasAnyLinks = Object.values(links).some(set => set.size > 0);
-
-        if (!hasAnyLinks) {
-            alert('Molimo povežite barem jedan predmet prije eksportovanja.');
-            return;
-        }
-
-        const plainLinks = {};
-        for (const [key, value] of Object.entries(links)) {
-            plainLinks[key] = Array.from(value);
-        }
-
-        const datumPocetka = document.getElementById('datum_pocetka')?.value;
-        const datumKraja = document.getElementById('datum_kraja')?.value;
-
-        if (!datumPocetka || !datumKraja) {
-            alert('Molimo unesite datume mobilnosti.');
-            return;
-        }
-
-        const saveRoute = "{{ route(auth()->user()->type === 0 ? 'admin.mobility.save' : 'profesor.mobility.save') }}";
-
-        fetch(saveRoute, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}",
-            },
-            body: JSON.stringify({
-                ime,
-                prezime,
-                fakultet_id: fakultetSelect.value, 
-                student_id: studentSelect.value,   
-                broj_indeksa: brojIndeksa,
-                datum_pocetka: datumPocetka,
-                datum_kraja: datumKraja,
-                links: plainLinks,
-                courses: uploadedCourses
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert(data.message);
-        })
-        .catch(err => alert("Save failed: " + err));
-    });
-
-    const studentSelect = document.getElementById('student_id');
-    const studentSearchInput = document.getElementById('student_search');
-    const studentSearchResults = document.getElementById('student_search_results');
-    
-    const studentsData = Array.from(studentSelect.options)
-        .filter(option => option.value)
-        .map(option => ({
-            id: option.value,
-            text: option.text,
-            ime: option.dataset.ime,
-            prezime: option.dataset.prezime,
-            br_indexa: option.dataset.br_indexa,
-            element: option
-        }));
-
-    if (studentSelect.value) {
-        const selected = studentsData.find(s => s.id === studentSelect.value);
-        if (selected) {
-            studentSearchInput.value = selected.text;
-        }
-    }
-
-    studentSearchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = studentsData.filter(student => 
-            student.text.toLowerCase().includes(query)
-        );
-
-        renderSearchResults(filtered);
-    });
-
-    studentSearchInput.addEventListener('focus', () => {
-        const query = studentSearchInput.value.toLowerCase();
-        const filtered = studentsData.filter(student => 
-            student.text.toLowerCase().includes(query)
-        );
-        renderSearchResults(filtered);
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!studentSearchInput.contains(e.target) && !studentSearchResults.contains(e.target)) {
-            studentSearchResults.classList.add('hidden');
-        }
-    });
-
-    function renderSearchResults(results) {
-        studentSearchResults.innerHTML = '';
-        
-        if (results.length === 0) {
-            const noResults = document.createElement('div');
-            noResults.className = 'px-4 py-2 text-gray-500 italic';
-            noResults.textContent = 'Nema rezultata';
-            studentSearchResults.appendChild(noResults);
-        } else {
-            results.forEach(student => {
-                const div = document.createElement('div');
-                div.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors';
-                div.textContent = student.text;
-                
-                div.addEventListener('click', () => {
-                    studentSearchInput.value = student.text;
-                    studentSelect.value = student.id;
-                    studentSelect.dispatchEvent(new Event('change')); 
-                    studentSearchResults.classList.add('hidden');
+        function renderStudentSearchResults(results) {
+            studentSearchResults.innerHTML = '';
+            if (results.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'px-4 py-2 text-gray-500 italic';
+                noResults.textContent = 'Nema rezultata';
+                studentSearchResults.appendChild(noResults);
+            } else {
+                results.forEach(student => {
+                    const div = document.createElement('div');
+                    div.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors';
+                    div.textContent = student.text;
+                    div.addEventListener('click', () => {
+                        studentSearchInput.value = student.text;
+                        studentSelect.value = student.id;
+                        studentSelect.dispatchEvent(new Event('change')); 
+                        studentSearchResults.classList.add('hidden');
+                    });
+                    studentSearchResults.appendChild(div);
                 });
-
-                studentSearchResults.appendChild(div);
-            });
+            }
+            studentSearchResults.classList.remove('hidden');
         }
 
-        studentSearchResults.classList.remove('hidden');
-    }
-
-    const fakultetSelectElement = document.getElementById('fakultet_id');
-    const fakultetSearchInput = document.getElementById('fakultet_search');
-    const fakultetSearchResults = document.getElementById('fakultet_search_results');
-    
-    const facultiesData = Array.from(fakultetSelectElement.options)
-        .filter(option => option.value) // Skip placeholder
-        .map(option => ({
-            id: option.value,
-            text: option.text,
-            naziv: option.dataset.naziv,
-            element: option
-        }));
-
-    if (fakultetSelectElement.value) {
-        const selected = facultiesData.find(f => f.id === fakultetSelectElement.value);
-        if (selected) {
-            fakultetSearchInput.value = selected.text;
-        }
-    }
-
-    fakultetSearchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = facultiesData.filter(faculty => 
-            faculty.text.toLowerCase().includes(query)
-        );
-
-        renderFacultySearchResults(filtered);
-    });
-
-    fakultetSearchInput.addEventListener('focus', () => {
-        const query = fakultetSearchInput.value.toLowerCase();
-        const filtered = facultiesData.filter(faculty => 
-            faculty.text.toLowerCase().includes(query)
-        );
-        renderFacultySearchResults(filtered);
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!fakultetSearchInput.contains(e.target) && !fakultetSearchResults.contains(e.target)) {
-            fakultetSearchResults.classList.add('hidden');
-        }
-    });
-
-    function renderFacultySearchResults(results) {
-        fakultetSearchResults.innerHTML = '';
+        const fakultetSelectElement = document.getElementById('fakultet_id');
+        const fakultetSearchInput = document.getElementById('fakultet_search');
+        const fakultetSearchResults = document.getElementById('fakultet_search_results');
         
-        if (results.length === 0) {
-            const noResults = document.createElement('div');
-            noResults.className = 'px-4 py-2 text-gray-500 italic';
-            noResults.textContent = 'Nema rezultata';
-            fakultetSearchResults.appendChild(noResults);
-        } else {
-            results.forEach(faculty => {
-                const div = document.createElement('div');
-                div.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors';
-                div.textContent = faculty.text;
-                
-                div.addEventListener('click', () => {
-                    fakultetSearchInput.value = faculty.text;
-                    fakultetSelectElement.value = faculty.id;
-                    fakultetSelectElement.dispatchEvent(new Event('change')); 
-                    fakultetSearchResults.classList.add('hidden');
-                });
+        const facultiesData = Array.from(fakultetSelectElement.options)
+            .filter(option => option.value)
+            .map(option => ({
+                id: option.value,
+                text: option.text,
+                naziv: option.dataset.naziv,
+                element: option
+            }));
 
-                fakultetSearchResults.appendChild(div);
-            });
+        if (fakultetSelectElement.value) {
+            const selected = facultiesData.find(f => f.id === fakultetSelectElement.value);
+            if (selected) fakultetSearchInput.value = selected.text;
         }
 
-        fakultetSearchResults.classList.remove('hidden');
-    }
+        fakultetSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            renderFacultySearchResults(facultiesData.filter(f => f.text.toLowerCase().includes(query)));
+        });
 
+        fakultetSearchInput.addEventListener('focus', () => {
+            const query = fakultetSearchInput.value.toLowerCase();
+            renderFacultySearchResults(facultiesData.filter(f => f.text.toLowerCase().includes(query)));
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!fakultetSearchInput.contains(e.target) && !fakultetSearchResults.contains(e.target)) {
+                fakultetSearchResults.classList.add('hidden');
+            }
+        });
+
+        function renderFacultySearchResults(results) {
+            fakultetSearchResults.innerHTML = '';
+            if (results.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'px-4 py-2 text-gray-500 italic';
+                noResults.textContent = 'Nema rezultata';
+                fakultetSearchResults.appendChild(noResults);
+            } else {
+                results.forEach(faculty => {
+                    const div = document.createElement('div');
+                    div.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer transition-colors';
+                    div.textContent = faculty.text;
+                    div.addEventListener('click', () => {
+                        fakultetSearchInput.value = faculty.text;
+                        fakultetSelectElement.value = faculty.id;
+                        fakultetSelectElement.dispatchEvent(new Event('change')); 
+                        fakultetSearchResults.classList.add('hidden');
+                    });
+                    fakultetSearchResults.appendChild(div);
+                });
+            }
+            fakultetSearchResults.classList.remove('hidden');
+        }
     </script>
 </x-app-layout>
