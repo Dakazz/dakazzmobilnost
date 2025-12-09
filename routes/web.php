@@ -87,6 +87,7 @@ Route::middleware('adminAuth')->prefix('admin')->group(function () {
     Route::resource('studenti', \App\Http\Controllers\StudentController::class)->names('studenti');
 
     Route::resource('izvjestaji', IzvjestajController::class)->names('izvjestaji');
+});
 
 Route::middleware('profesorAuth')->prefix('profesor')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'profesorDashboard'])->name('profesorDashboardShow');
