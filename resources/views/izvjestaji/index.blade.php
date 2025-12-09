@@ -15,7 +15,7 @@
         <!-- Izvještaj o Studentima -->
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="text-center">
-                <div class="text-4xl font-bold text-blue-500 mb-3">👥</div>
+                <div class="text-4xl font-bold text-blue-500 mb-3"></div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Studenti</h3>
                 <p class="text-gray-600 mb-4">Pregled svih registrovanih studenata</p>
                 <a href="{{ route('izvjestaji.show', 'studenti') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-block">
@@ -27,7 +27,7 @@
         <!-- Izvještaj o Mobilnostima -->
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="text-center">
-                <div class="text-4xl font-bold text-green-500 mb-3">✈️</div>
+                <div class="text-4xl font-bold text-green-500 mb-3"></div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Mobilnosti</h3>
                 <p class="text-gray-600 mb-4">Pregled svih mobilnosti studenata</p>
                 <a href="{{ route('izvjestaji.show', 'mobilnosti') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-block">
@@ -39,7 +39,7 @@
         <!-- Izvještaj o Fakultetima -->
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="text-center">
-                <div class="text-4xl font-bold text-purple-500 mb-3">🏛️</div>
+                <div class="text-4xl font-bold text-purple-500 mb-3"></div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Fakulteti</h3>
                 <p class="text-gray-600 mb-4">Pregled svih registrovanih fakulteta</p>
                 <a href="{{ route('izvjestaji.show', 'fakulteti') }}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded inline-block">
@@ -51,9 +51,9 @@
         <!-- Izvještaj o Univerzitetima -->
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
             <div class="text-center">
-                <div class="text-4xl font-bold text-orange-500 mb-3">🎓</div>
+                <div class="text-4xl font-bold text-orange-500 mb-3"></div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Univerziteti</h3>
-                <p class="text-gray-600 mb-4">Pregled svih registrovanih univerziteta</p>
+                <p class="text-gray-600 mb-4">Pregled svvvih registrovanih univerziteta</p>
                 <a href="{{ route('izvjestaji.show', 'univerziteti') }}" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded inline-block">
                     Otvori Izvještaj
                 </a>

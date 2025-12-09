@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'https://dakazzmobilnost.onrender.com'),
+    'url' => env('APP_URL', 'http://localhost'),
 
     /*
     |----------------------------------------------------------------------
