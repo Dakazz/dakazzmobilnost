@@ -46,6 +46,10 @@
                             {{ __('Prepisi') }}
                         </x-nav-link>
 
+                        <x-nav-link :href="route('izvjestaji.index')" :active="request()->routeIs('izvjestaji.*')">
+                            {{ __('Izvještaji') }}
+                        </x-nav-link>
+
                     @elseif((int)$user->type === 1)
                         <x-nav-link :href="route('profesorDashboardShow')" :active="request()->routeIs('profesorDashboardShow')">
                             {{ __('Dashboard') }}
@@ -144,7 +148,9 @@
                     {{ __('Prepisi') }}
                 </x-responsive-nav-link>
 
-             
+                <x-responsive-nav-link :href="route('izvjestaji.index')" :active="request()->routeIs('izvjestaji.*')">
+                    {{ __('Izvještaji') }}
+                </x-responsive-nav-link>
             @elseif((int)$user->type === 1)
                 <x-responsive-nav-link :href="route('profesorDashboardShow')" :active="request()->routeIs('profesorDashboardShow')">
                     {{ __('Dashboard') }}
